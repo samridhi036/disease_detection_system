@@ -65,8 +65,9 @@ def train_and_save(model_dir: Path = MODEL_DIR) -> None:
     joblib.dump(svm_pipeline, model_dir / "svm.pkl")
     joblib.dump(rf,           model_dir / "random_forest.pkl")
 
-    # Save encoder separately (needed by predict.py and evaluate_models.py)
+    # Save encoder and scaler separately (needed by predict.py and views.py)
     joblib.dump(data["encoder"], model_dir / "label_encoder.pkl")
+    joblib.dump(data["scaler"],  model_dir / "scaler.pkl")
 
     logger.info("All models saved to %s", model_dir)
 

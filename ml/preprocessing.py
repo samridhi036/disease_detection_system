@@ -10,11 +10,9 @@ logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# The raw filtered dataset is in "long" format: a Disease column plus
-# Symptom_1 .. Symptom_17 columns containing symptom NAMES (strings), with
-# many empty cells. _to_binary_features() converts this into a wide
-# one-hot matrix (disease + one 0/1 column per unique symptom).
-DATASET_PATH = BASE_DIR / "dataset" / "dataset_filtered.csv"
+# Primary dataset: gastro_disease.xlsx is already in binary wide format.
+# Fallback: dataset_filtered.csv in long format (converted automatically).
+DATASET_PATH = BASE_DIR / "dataset" / "gastro_disease.xlsx"
 
 
 def _to_binary_features(df: pd.DataFrame) -> pd.DataFrame:

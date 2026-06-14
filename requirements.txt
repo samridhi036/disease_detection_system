@@ -1,0 +1,8 @@
+
+django
+joblib
+numpy
+openpyxl
+pandas
+scikit-learn
+gunicorn

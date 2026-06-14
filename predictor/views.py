@@ -1,6 +1,7 @@
 import joblib
 import numpy as np
 import json
+import traceback
 
 from pathlib import Path
 from django.shortcuts import render
