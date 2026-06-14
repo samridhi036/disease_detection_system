@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | Evergreen Society</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="auth-shell">
+
+  <aside class="panel-left">
+    <div class="brand">
+      <span class="brand-mark">ES</span>
+      <span class="brand-name">Evergreen Society</span>
+    </div>
+
+    <h1 class="panel-headline">Become a member.</h1>
+    <p class="panel-sub">Fill in your details and we'll put together your membership card as you go.</p>
+
+    <div class="id-card" id="idCard" aria-hidden="true">
+      <div class="id-card-row id-card-head">
+        <span class="id-org">Evergreen<br>Society</span>
+        <span class="id-tag">Member</span>
+      </div>
+      <div class="id-perf"></div>
+      <div class="id-card-row id-card-main">
+        <div class="id-photo" id="cardPhoto">&#10022;</div>
+        <div class="id-fields">
+          <div class="id-field">
+            <span class="id-label">Name</span>
+            <span class="id-value" id="cardName">Your name</span>
+          </div>
+          <div class="id-field">
+            <span class="id-label">Username</span>
+            <span class="id-value mono" id="cardUsername">@username</span>
+          </div>
+          <div class="id-field">
+            <span class="id-label">Date of birth</span>
+            <span class="id-value mono" id="cardDob">&mdash;</span>
+          </div>
+        </div>
+      </div>
+      <div class="id-perf"></div>
+      <div class="id-card-row id-card-foot">
+        <span>No. ES-0001</span>
+        <span>Pending issue</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="panel-right">
+    <div class="form-wrap">
+
+      <div class="tabs" role="tablist">
+        <a class="tab" href="login.html" role="tab">Sign in</a>
+        <a class="tab active" href="register.html" role="tab" aria-current="page">Register</a>
+      </div>
+
+      <form class="auth-form" id="registerForm" novalidate>
+        <h2>Create your account</h2>
+        <p class="form-intro">It only takes a minute &mdash; your card preview fills in as you type.</p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="middleName">Middle name <span class="optional-tag">(optional)</span></label>
+            <input type="text" id="middleName" name="middleName" autocomplete="additional-name">
+          </div>
+          <div class="field">
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="field-row two">
+          <div class="field">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="field-row two">
+          <div class="field">
+            <label for="contact">Contact number</label>
+            <input type="tel" id="contact" name="contact" required autocomplete="tel" placeholder="+1 555 123 4567">
+          </div>
+          <div class="field">
+            <label for="dob">Date of birth</label>
+            <input type="date" id="dob" name="dob" required autocomplete="bday">
+          </div>
+        </div>
+
+        <div class="field-row two">
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input type="password" id="password" name="password" required autocomplete="new-password">
+              <button type="button" class="eye-btn" data-target="password" aria-label="Show password">
+                <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
+              <button type="button" class="eye-btn" data-target="confirmPassword" aria-label="Show password">
+                <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <p class="field-msg" id="confirmMsg"></p>
+          </div>
+        </div>
+
+        <ul class="pw-checklist" id="pwChecklist">
+          <li data-rule="length">At least 8 characters</li>
+          <li data-rule="upper">One uppercase letter</li>
+          <li data-rule="number">One number</li>
+          <li data-rule="special">One special character</li>
+        </ul>
+
+        <button type="submit" class="submit-btn">Create account</button>
+
+        <div class="form-links">
+          <a href="login.html">Already have an account? Login</a>
+        </div>
+
+        <div class="status-msg" role="status"></div>
+      </form>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

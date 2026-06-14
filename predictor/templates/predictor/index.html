@@ -1,0 +1,283 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}GastroPredict — Select Your Symptoms{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-badge">AI-Powered</div>
+        <h1 class="hero-title">Gastrointestinal & Liver<br>Disease Prediction</h1>
+        <p class="hero-subtitle">Select your symptoms below and our trained machine learning model will predict the most likely conditions — covering 25 GI and hepatology diseases.</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <span class="stat-number">25</span>
+                <span class="stat-label">Diseases</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">{{ total_symptoms }}</span>
+                <span class="stat-label">Symptoms</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">RF</span>
+                <span class="stat-label">Algorithm</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if not model_ready %}
+<div class="alert alert-error">
+    <span class="alert-icon">⚠️</span>
+    <div>
+        <strong>Model not trained yet.</strong> Please run the training script first:
+        <code>python predictor/ml/train_model.py</code>
+    </div>
+</div>
+{% else %}
+
+<section class="predictor-section">
+    <div class="predictor-container">
+
+        <div class="mode-switcher">
+            <button class="mode-btn active" id="manualModeBtn">
+                <span>🗂️</span> Browse All Symptoms
+            </button>
+            <button class="mode-btn" id="guidedModeBtn">
+                <span>💬</span> Guided Symptom Checker
+            </button>
+        </div>
+
+        <div class="patient-panel">
+            <div class="patient-panel-header">
+                <span class="patient-panel-icon">👤</span>
+                <span class="patient-panel-title">Patient Information <span class="optional-tag">optional</span></span>
+            </div>
+            <div class="patient-fields">
+                <div class="patient-field">
+                    <label class="field-label" for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" class="field-input" placeholder="e.g. John Doe" autocomplete="off" maxlength="150">
+                </div>
+                <div class="patient-field patient-field-sm">
+                    <label class="field-label" for="patientAge">Age</label>
+                    <input type="number" id="patientAge" class="field-input" placeholder="e.g. 34" min="1" max="120">
+                </div>
+            </div>
+        </div>
+
+        <div class="search-bar-wrapper">
+            <input type="text" id="symptomSearch" placeholder="🔍 Search symptoms..." class="symptom-search" autocomplete="off">
+            <div class="selected-count-badge" id="selectedCountBadge" style="display:none;">
+                <span id="selectedCount">0</span> selected
+            </div>
+        </div>
+
+<!--        <div class="symptom-categories" id="symptomCategories">-->
+
+<!--            <label class="symptom-card"-->
+<!--               data-symptom="{{ symptom.key }}"-->
+<!--               data-category="{{ symptom.category }}">-->
+<!--&lt;!&ndash;            <button class="category-btn active" data-category="all">All Symptoms</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="category-btn" data-category="digestive">Digestive</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="category-btn" data-category="pain">Pain</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="category-btn" data-category="systemic">Systemic</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="category-btn" data-category="liver">Liver/Hepatic</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="category-btn" data-category="bowel">Bowel</button>&ndash;&gt;-->
+<!--        </div>-->
+        <div class="symptom-categories" id="symptomCategories">
+
+            <button class="category-btn active" data-category="all">All Symptoms</button>
+            <button class="category-btn" data-category="pain">Pain</button>
+            <button class="category-btn" data-category="digestive">Digestive</button>
+            <button class="category-btn" data-category="bowel">Bowel</button>
+            <button class="category-btn" data-category="systemic">Systemic</button>
+            <button class="category-btn" data-category="liver">Liver</button>
+            <button class="category-btn" data-category="other">Other</button>
+
+        </div>
+
+
+<!--        <p>DEBUG: {{ symptoms }}</p>-->
+
+<!--        <div class="symptoms-grid" id="symptomsGrid">-->
+<!--            {% for symptom in symptoms %}-->
+<!--            <label class="symptom-card" data-symptom="{{ symptom.key }}" data-category="{{ symptom.key|slugify }}">-->
+<!--                <input type="checkbox" name="symptom" value="{{ symptom.key }}" class="symptom-checkbox">-->
+<!--                <span class="symptom-icon">○</span>-->
+<!--                <span class="symptom-name">{{ symptom.label }}</span>-->
+<!--            </label>-->
+<!--            {% endfor %}-->
+<!--        </div>-->
+
+<!--        <div class="symptoms-grid" id="symptomsGrid">-->
+
+<!--            {% for symptom in symptoms %}-->
+<!--            <label class="symptom-card"-->
+<!--                   data-symptom="{{ symptom.key }}"-->
+<!--                   data-category="{{ symptom.category }}">-->
+<!--        -->
+<!--                <input type="checkbox"-->
+<!--                       name="symptom"-->
+<!--                       value="{{ symptom.key }}"-->
+<!--                       class="symptom-checkbox">-->
+<!--        -->
+<!--                <span class="symptom-icon">○</span>-->
+<!--                <span class="symptom-name">{{ symptom.label }}</span>-->
+<!--        -->
+<!--            </label>-->
+
+
+<!--            {% endfor %}-->
+
+<!--        </div>-->
+
+        <div class="symptoms-grid" id="symptomsGrid">
+            {% for symptom in symptoms %}
+            <label class="symptom-card"
+                   data-symptom="{{ symptom.key|default:'' }}"
+                   data-category="{{ symptom.category|default:'other' }}">
+
+                <input type="checkbox"
+                       class="symptom-checkbox"
+                       value="{{ symptom.key|default:'' }}">
+
+                <span class="symptom-icon">○</span>
+                <span class="symptom-name">{{ symptom.label }}</span>
+
+            </label>
+            {% endfor %}
+        </div>
+
+        <div class="action-bar">
+            <button class="btn-clear" id="clearAll">Clear All</button>
+            <button class="btn-predict" id="predictBtn" disabled>
+                <span class="btn-icon">🔬</span>
+                Predict Disease
+            </button>
+        </div>
+
+    </div>
+</section>
+
+<section class="results-section" id="resultsSection" style="display:none;">
+    <div class="results-container">
+        <div class="results-header">
+            <h2 class="results-title">Prediction Results</h2>
+            <p class="results-subtitle" id="resultsSubtitle"></p>
+        </div>
+        <div id="resultsContent"></div>
+        <div class="results-footer">
+            <button class="btn-new-prediction" id="newPrediction">← New Prediction</button>
+            <button class="btn-print" id="printReportBtn">
+                <span>🖨️</span> Print / Save PDF
+            </button>
+        </div>
+    </div>
+</section>
+
+<div id="printReport" class="print-report" aria-hidden="true">
+    <div class="pr-header">
+        <div class="pr-logo-row">
+            <span class="pr-logo-icon">🩺</span>
+            <span class="pr-logo-text">GastroPredict</span>
+            <span class="pr-logo-sub">AI-Powered Disease Prediction System</span>
+        </div>
+        <div class="pr-report-meta">
+            <span id="prReportDate"></span>
+            <span class="pr-meta-label">Confidential Medical Report</span>
+        </div>
+    </div>
+    <div class="pr-divider"></div>
+    <div class="pr-patient-section" id="prPatientSection"></div>
+    <div class="pr-symptoms-section" id="prSymptomsSection"></div>
+    <div class="pr-predictions-section" id="prPredictionsSection"></div>
+    <div class="pr-disclaimer">
+        <strong>⚠️ Disclaimer:</strong> This report is generated by an AI-based tool for informational and educational purposes only. It does not constitute a medical diagnosis and should not replace professional medical consultation. Please consult a qualified healthcare provider for proper diagnosis and treatment.
+    </div>
+    <div class="pr-footer-line">
+        Generated by GastroPredict &nbsp;|&nbsp; <span id="prFooterDate"></span>
+    </div>
+</div>
+
+<div class="guided-overlay" id="guidedOverlay" style="display:none;" role="dialog" aria-modal="true">
+    <div class="guided-modal">
+        <button class="guided-close" id="guidedClose" aria-label="Close">✕</button>
+
+        <div class="guided-progress-bar">
+            <div class="guided-progress-fill" id="guidedProgressFill"></div>
+        </div>
+
+        <div class="guided-step" id="gStepArea">
+            <div class="guided-step-label">Step 1 of 3</div>
+            <h2 class="guided-step-title">Where are your symptoms?</h2>
+            <p class="guided-step-desc">Select all the body areas where you are experiencing problems. You can choose more than one.</p>
+            <div class="area-grid" id="areaGrid">
+                <button class="area-card" data-area="upper_gi">
+                    <span class="area-icon">🫁</span>
+                    <span class="area-name">Upper GI / Stomach</span>
+                    <span class="area-hint">Heartburn, nausea, swallowing</span>
+                </button>
+                <button class="area-card" data-area="lower_gi">
+                    <span class="area-icon">🫃</span>
+                    <span class="area-name">Lower GI / Bowel</span>
+                    <span class="area-hint">Diarrhea, constipation, rectal bleeding</span>
+                </button>
+                <button class="area-card" data-area="liver">
+                    <span class="area-icon">🫀</span>
+                    <span class="area-name">Liver / Hepatic</span>
+                    <span class="area-hint">Jaundice, dark urine, swelling</span>
+                </button>
+                <button class="area-card" data-area="systemic">
+                    <span class="area-icon">🌡️</span>
+                    <span class="area-name">General / Systemic</span>
+                    <span class="area-hint">Fatigue, fever, weight loss</span>
+                </button>
+            </div>
+            <div class="guided-nav">
+                <span></span>
+                <button class="guided-next" id="areaNext" disabled>Next →</button>
+            </div>
+        </div>
+
+        <div class="guided-step" id="gStepQuestions" style="display:none;">
+            <div class="guided-step-label" id="qStepLabel"></div>
+            <h2 class="guided-step-title" id="qStepTitle"></h2>
+            <p class="guided-step-desc" id="qStepDesc">Answer yes or no for each symptom below.</p>
+            <div class="question-list" id="questionList"></div>
+            <div class="guided-nav">
+                <button class="guided-back" id="qBack">← Back</button>
+                <button class="guided-next" id="qNext">Next →</button>
+            </div>
+        </div>
+
+        <div class="guided-step" id="gStepSummary" style="display:none;">
+            <div class="guided-step-label">Final Step</div>
+            <h2 class="guided-step-title">Review Your Symptoms</h2>
+            <p class="guided-step-desc" id="summaryDesc"></p>
+            <div class="summary-chips" id="summaryChips"></div>
+            <div class="summary-none" id="summaryNone" style="display:none;">
+                <span>😕</span> No symptoms were selected. Please go back and answer the questions.
+            </div>
+            <div class="guided-nav">
+                <button class="guided-back" id="summaryBack">← Back</button>
+                <button class="guided-next guided-predict" id="summaryPredict">
+                    🔬 Run Prediction
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+    <div class="loading-card">
+        <div class="spinner"></div>
+        <p>Analyzing symptoms...</p>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'predictor/js/script.js' %}"></script>
+{% endblock %}
