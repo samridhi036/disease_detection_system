@@ -52,7 +52,7 @@ def _to_binary_features(df: pd.DataFrame) -> pd.DataFrame:
     return binary
 
 
-def load_raw_data(path: Path = DATASET_PATH) -> pd.DataFrame:
+def load_raw_data(path: Path = '..\dataset\dataset_filtered.csv') -> pd.DataFrame:
     """Load the dataset and convert/clean it into a binary feature matrix."""
     if not path.exists():
         raise FileNotFoundError(f"Dataset not found at: {path}")

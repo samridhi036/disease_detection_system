@@ -18,7 +18,7 @@ MODEL_DIR = BASE_DIR / "ml" / "saved_models"
 
 # models
 model = joblib.load(MODEL_DIR / "random_forest.pkl")
-scaler = joblib.load(MODEL_DIR / "scaler.pkl")
+# scaler = joblib.load(MODEL_DIR / "scaler.pkl")
 encoder = joblib.load(MODEL_DIR / "label_encoder.pkl")
 
 # Symptoms = model features (132 columns)

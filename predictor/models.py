@@ -69,3 +69,99 @@ class PredictionSession(models.Model):
     @property
     def display_name(self):
         return self.patient_name if self.patient_name else 'Anonymous'
+
+# class Register(models.Model):
+#     first_name = models.CharField(max_length=200)
+#     middle_name = models.CharField(max_length=200)
+#     last_name = models.CharField(max_length=200)
+#     username = models.CharField(max_length=200)
+#     email = models.EmailField()
+#     contact = models.CharField(max_length=200)
+#     dob = models.DateField()
+#     password = models.CharField(max_length=200)
+#
+#
+#
+# class Login:
+#     username = models.CharField(max_length=200)
+#     email = models.EmailField()
+#     password = models.CharField(max_length=200)
+from django.db import models
+from django.core.validators import RegexValidator, MinLengthValidator
+from django.contrib.auth.hashers import make_password, check_password
+
+
+class Register(models.Model):
+    # Phone number validator
+    phone_regex = RegexValidator(
+        regex=r'^\+?1?\d{9,15}$',
+        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+    )
+
+    first_name = models.CharField(max_length=200)
+    middle_name = models.CharField(max_length=200, blank=True, null=True)
+    last_name = models.CharField(max_length=200)
+    username = models.CharField(max_length=200, unique=True)
+    email = models.EmailField(max_length=254, unique=True)
+    contact = models.CharField(max_length=17, validators=[phone_regex])
+    dob = models.DateField()
+    password = models.CharField(max_length=128)  # Increased for hash storage
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.username} - {self.email}"
+
+    def save(self, *args, **kwargs):
+        # Hash password before saving
+        if not self.password.startswith('pbkdf2_sha256$'):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
+    def check_password(self, raw_password):
+        """Check password against stored hash"""
+        return check_password(raw_password, self.password)
+
+
+class Login(models.Model):
+    user = models.ForeignKey(Register, on_delete=models.CASCADE)
+    login_time = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    is_successful = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-login_time']
+
+    def __str__(self):
+        return f"{self.user.username} logged in at {self.login_time}"
+
+    @classmethod
+    def authenticate(cls, username=None, email=None, password=None):
+        """Authenticate user with username or email and password"""
+        try:
+            if email:
+                user = Register.objects.get(email=email)
+            elif username:
+                user = Register.objects.get(username=username)
+            else:
+                return None
+
+            if user.check_password(password):
+                # Create login record
+                cls.objects.create(user=user, is_successful=True)
+                return user
+            else:
+                # Create failed login attempt record
+                cls.objects.create(user=user, is_successful=False)
+                return None
+
+        except Register.DoesNotExist:
+            return None
+
+    @classmethod
+    def get_login_history(cls, user):
+        return cls.objects.filter(user=user)[:10]
