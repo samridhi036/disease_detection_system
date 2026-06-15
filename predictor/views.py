@@ -13,6 +13,9 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 from .models import PredictionSession
 
@@ -312,3 +315,78 @@ def clear_history(request):
 
 def about(request):
     return render(request, "predictor/about.html")
+
+
+def forgot_password(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    reset_link = None
+    submitted_email = ''
+    error = None
+
+    if request.method == 'POST':
+        submitted_email = request.POST.get('email', '').strip()
+
+        if not submitted_email or '@' not in submitted_email:
+            error = 'Please enter a valid email address.'
+        else:
+            try:
+                user = User.objects.get(email__iexact=submitted_email)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                reset_link = request.build_absolute_uri(
+                    f'/reset-password/{uid}/{token}/'
+                )
+            except User.DoesNotExist:
+                error = 'No account found with that email address.'
+
+    return render(request, 'predictor/forgot_password.html', {
+        'reset_link': reset_link,
+        'submitted_email': submitted_email,
+        'error': error,
+    })
+
+
+def reset_password(request, uidb64, token):
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    user = None
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    token_valid = user is not None and default_token_generator.check_token(user, token)
+
+    errors = []
+    success = False
+
+    if token_valid and request.method == 'POST':
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if len(password) < 8:
+            errors.append('Password must be at least 8 characters long.')
+        elif not any(c.isupper() for c in password):
+            errors.append('Password must contain at least one uppercase letter.')
+        elif not any(c.isdigit() for c in password):
+            errors.append('Password must contain at least one number.')
+        elif not any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in password):
+            errors.append('Password must contain at least one special character.')
+        if password and confirm_password and password != confirm_password:
+            errors.append('Passwords do not match.')
+
+        if not errors:
+            user.set_password(password)
+            user.save()
+            success = True
+
+    return render(request, 'predictor/reset_password.html', {
+        'token_valid': token_valid,
+        'success': success,
+        'errors': errors,
+        'username': user.username if user else '',
+    })
