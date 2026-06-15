@@ -24,9 +24,16 @@ encoder = joblib.load(MODEL_DIR / "label_encoder.pkl")
 
 model_features = list(model.feature_names_in_)
 
-_DATASET_PATH = BASE_DIR / "dataset" / "gastro_diseases.xlsx"
-_df = pd.read_excel(_DATASET_PATH, sheet_name='disease_filtered_data')
-display_symptoms = [c.strip() for c in _df.columns if c.strip() != 'prognosis']
+_DATASET_PATH = BASE_DIR / "dataset" / "dataset_filtered.csv"
+_df = pd.read_csv(_DATASET_PATH)
+_syms = set()
+for _col in _df.columns:
+    if _col.startswith('Symptom_'):
+        for _val in _df[_col].dropna():
+            _v = str(_val).strip().lower().replace(' ', '_')
+            if _v and _v != 'nan':
+                _syms.add(_v)
+display_symptoms = sorted(_syms)
 
 
 def format_symptom_label(symptom):
@@ -93,12 +100,12 @@ def register(request):
 
     if request.method == 'POST':
         form_data = request.POST
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
+        first_name = request.POST.get('firstName', '').strip()
+        last_name = request.POST.get('lastName', '').strip()
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
-        confirm_password = request.POST.get('confirm_password', '')
+        confirm_password = request.POST.get('confirmPassword', '')
 
         if not first_name:
             errors.append('First name is required.')
@@ -168,7 +175,7 @@ def predict(request):
         patient_age = data.get("patient_age")
 
         selected_symptoms = [
-            str(s).strip()
+            str(s).strip().lower().replace(' ', '_')
             for s in selected_symptoms
             if s is not None and str(s).strip()
         ]
@@ -184,10 +191,12 @@ def predict(request):
             return JsonResponse({"error": "Please select at least 5 symptoms."}, status=400)
 
         input_vector = np.zeros(len(model_features))
+        matched = 0
         for symptom in selected_symptoms:
             if symptom in model_features:
                 idx = model_features.index(symptom)
                 input_vector[idx] = 1
+                matched += 1
 
         probabilities = model.predict_proba([input_vector])[0]
         top_indices = np.argsort(probabilities)[::-1][:3]
@@ -210,7 +219,7 @@ def predict(request):
                 patient_name=patient_name,
                 patient_age=patient_age,
                 symptoms=selected_symptoms,
-                symptoms_count=int(np.sum(input_vector)),
+                symptoms_count=len(selected_symptoms),
                 predictions=predictions,
                 top_disease=top["disease"],
                 top_probability=top["probability"],
@@ -221,7 +230,7 @@ def predict(request):
         return JsonResponse({
             "success": True,
             "predictions": predictions,
-            "symptoms_count": int(np.sum(input_vector))
+            "symptoms_count": len(selected_symptoms)
         })
 
     except Exception as e:

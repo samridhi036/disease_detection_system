@@ -1,0 +1,75 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}About — GastroPredict{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <div class="about-container">
+        <h1 class="about-title">About GastroPredict</h1>
+        <p class="about-lead">GastroPredict is an AI-powered disease prediction system focused on gastrointestinal and hepatology conditions.</p>
+
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-card-icon">🤖</div>
+                <h3>Machine Learning Model</h3>
+                <p>Uses a Random Forest classifier trained on a comprehensive symptom-disease dataset covering 25 conditions including GI diseases and hepatology (hepatitis, cirrhosis, NAFLD).</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon">🫁</div>
+                <h3>Diseases Covered</h3>
+                <p>GERD, IBS, Crohn's Disease, Ulcerative Colitis, Peptic Ulcer, Gastritis, Celiac Disease, Appendicitis, Colorectal Cancer, Hepatitis A/B/C, Cirrhosis, NAFLD, and more.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon">📊</div>
+                <h3>How It Works</h3>
+                <p>Select your symptoms, and the model analyzes the symptom pattern to predict the top 3 most likely conditions along with probability scores and specialist recommendations.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon">⚠️</div>
+                <h3>Important Disclaimer</h3>
+                <p>This system is for educational and informational purposes only. It is not a substitute for professional medical diagnosis. Always consult a qualified healthcare provider.</p>
+            </div>
+        </div>
+
+        <div class="diseases-list">
+            <h2>Covered Diseases</h2>
+            <div class="diseases-grid">
+                <div class="disease-tag gastro">GERD</div>
+                <div class="disease-tag gastro">IBS</div>
+                <div class="disease-tag gastro">Crohn's Disease</div>
+                <div class="disease-tag gastro">Ulcerative Colitis</div>
+                <div class="disease-tag gastro">Peptic Ulcer Disease</div>
+                <div class="disease-tag gastro">Gastritis</div>
+                <div class="disease-tag gastro">Celiac Disease</div>
+                <div class="disease-tag gastro">Appendicitis</div>
+                <div class="disease-tag gastro">Colorectal Cancer</div>
+                <div class="disease-tag gastro">Diverticulitis</div>
+                <div class="disease-tag gastro">Cholecystitis</div>
+                <div class="disease-tag gastro">Pancreatitis</div>
+                <div class="disease-tag hepato">Hepatitis A</div>
+                <div class="disease-tag hepato">Hepatitis B</div>
+                <div class="disease-tag hepato">Hepatitis C</div>
+                <div class="disease-tag hepato">Liver Cirrhosis</div>
+                <div class="disease-tag hepato">NAFLD</div>
+                <div class="disease-tag gastro">Gastroenteritis</div>
+                <div class="disease-tag gastro">Constipation</div>
+                <div class="disease-tag gastro">Hemorrhoids</div>
+                <div class="disease-tag gastro">Gallstones</div>
+                <div class="disease-tag gastro">Esophageal Cancer</div>
+                <div class="disease-tag gastro">Gastric Cancer</div>
+                <div class="disease-tag gastro">Eosinophilic Esophagitis</div>
+                <div class="disease-tag gastro">IBD</div>
+            </div>
+            <div class="legend">
+                <span class="legend-item gastro">GI Disease</span>
+                <span class="legend-item hepato">Hepatology</span>
+            </div>
+        </div>
+
+        <div class="about-cta">
+            <a href="/" class="btn-predict" style="text-decoration:none;">Start Prediction →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

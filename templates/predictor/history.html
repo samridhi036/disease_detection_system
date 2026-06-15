@@ -1,0 +1,238 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Prediction History — GastroPredict{% endblock %}
+
+{% block content %}
+<section class="history-section">
+    <div class="history-container">
+        <div class="history-header">
+            <div>
+                <h1 class="history-title">Prediction History</h1>
+                <p class="history-subtitle">
+                    {% if search_name %}
+                        Showing results for "<strong>{{ search_name }}</strong>" — {{ total_sessions }} record{{ total_sessions|pluralize }}
+                    {% else %}
+                        All past symptom analysis sessions — {{ total_sessions }} record{{ total_sessions|pluralize }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="history-actions">
+                {% if sessions %}
+                <button class="btn-danger-outline" id="clearHistoryBtn">🗑 Clear All</button>
+                {% endif %}
+                <a href="{% url 'index' %}" class="btn-predict" style="text-decoration:none;">+ New Prediction</a>
+            </div>
+        </div>
+
+        <div class="patient-filter-bar">
+            <form method="get" action="{% url 'history' %}" class="patient-filter-form">
+                <div class="filter-input-wrap">
+                    <span class="filter-icon">👤</span>
+                    <input
+                        type="text"
+                        name="name"
+                        value="{{ search_name }}"
+                        placeholder="Filter by patient name..."
+                        class="filter-input"
+                        list="patientNamesList"
+                        autocomplete="off"
+                    >
+                    <datalist id="patientNamesList">
+                        {% for name in patient_names %}
+                        <option value="{{ name }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <button type="submit" class="btn-filter">Search</button>
+                {% if search_name %}
+                <a href="{% url 'history' %}" class="btn-filter-clear">✕ Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if not sessions %}
+        <div class="empty-state">
+            <div class="empty-icon">{% if search_name %}🔍{% else %}📋{% endif %}</div>
+            <h3>{% if search_name %}No records for "{{ search_name }}"{% else %}No predictions yet{% endif %}</h3>
+            <p>{% if search_name %}Try a different name or clear the filter.{% else %}Start by selecting your symptoms on the home page to get your first prediction.{% endif %}</p>
+            {% if not search_name %}
+            <a href="{% url 'index' %}" class="btn-predict" style="text-decoration:none; margin-top:16px; display:inline-flex;">Start Prediction →</a>
+            {% endif %}
+        </div>
+        {% else %}
+
+        <div class="history-stats-bar">
+            <div class="hstat">
+                <span class="hstat-num">{{ total_sessions }}</span>
+                <span class="hstat-label">{% if search_name %}Matched{% else %}Total{% endif %} Sessions</span>
+            </div>
+            <div class="hstat">
+                <span class="hstat-num">{{ unique_diseases }}</span>
+                <span class="hstat-label">Unique Diseases</span>
+            </div>
+            <div class="hstat">
+                <span class="hstat-num">{{ avg_symptoms }}</span>
+                <span class="hstat-label">Avg Symptoms</span>
+            </div>
+            <div class="hstat">
+                <span class="hstat-num">{{ avg_confidence }}%</span>
+                <span class="hstat-label">Avg Confidence</span>
+            </div>
+        </div>
+
+        {% if top_disease_chart %}
+        <div class="disease-frequency-card">
+            <h3 class="section-heading">Most Predicted Diseases</h3>
+            <div class="disease-bars">
+                {% for item in top_disease_chart %}
+                <div class="disease-bar-row">
+                    <span class="disease-bar-label">{{ item.disease }}</span>
+                    <div class="disease-bar-track">
+                        <div class="disease-bar-fill" style="width: {{ item.pct }}%"></div>
+                    </div>
+                    <span class="disease-bar-count">{{ item.count }}x</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="history-list">
+            <h3 class="section-heading">All Sessions</h3>
+            {% for session in sessions %}
+            <div class="history-card" data-id="{{ session.id }}">
+                <div class="history-card-header">
+                    <div class="history-card-left">
+                        <div class="history-index">#{{ forloop.revcounter }}</div>
+                        <div>
+                            <div class="history-card-top-row">
+                                <div class="history-disease">{{ session.top_disease }}</div>
+                                {% if session.patient_name %}
+                                <span class="patient-name-tag">
+                                    👤 {{ session.patient_name }}{% if session.patient_age %}, {{ session.patient_age }}y{% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="history-meta">
+                                <span class="meta-item">🕐 {{ session.created_at|date:"M d, Y" }} at {{ session.created_at|time:"H:i" }}</span>
+                                <span class="meta-item">💊 {{ session.symptoms_count }} symptom{{ session.symptoms_count|pluralize }}</span>
+                                <span class="meta-item severity-tag">{{ session.top_severity }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="history-card-right">
+                        <div class="prob-badge {% if session.top_probability >= 50 %}prob-high{% elif session.top_probability >= 25 %}prob-medium{% else %}prob-low{% endif %}">
+                            {{ session.top_probability|floatformat:1 }}%
+                        </div>
+                        <button class="btn-toggle" onclick="toggleDetails({{ session.id }})">Details ▾</button>
+                    </div>
+                </div>
+
+                <div class="history-details" id="details-{{ session.id }}" style="display:none;">
+                    {% if session.patient_name or session.patient_age %}
+                    <div class="detail-patient-banner">
+                        <span>👤</span>
+                        <span>
+                            <strong>Patient:</strong>
+                            {{ session.patient_name|default:"—" }}
+                            {% if session.patient_age %} &nbsp;|&nbsp; <strong>Age:</strong> {{ session.patient_age }}{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="details-grid">
+                        <div class="details-block">
+                            <h4>Symptoms Selected</h4>
+                            <div class="symptoms-chips">
+                                {% for sym in session.symptoms %}
+                                <span class="symptom-chip">{{ sym|cut:'_'|title }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="details-block">
+                            <h4>All Predictions</h4>
+                            {% for pred in session.predictions %}
+                            <div class="mini-pred">
+                                <span class="mini-pred-name">{{ pred.disease }}</span>
+                                <div class="mini-pred-bar-track">
+                                    <div class="mini-pred-bar" style="width:{{ pred.probability }}%"></div>
+                                </div>
+                                <span class="mini-pred-pct">{{ pred.probability }}%</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="details-specialist">
+                        <span>👨‍⚕️ Recommended Specialist:</span>
+                        <strong>{{ session.top_specialist }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% endif %}
+    </div>
+</section>
+
+<div class="confirm-modal" id="confirmModal" style="display:none;">
+    <div class="confirm-box">
+        <div class="confirm-icon">⚠️</div>
+        <h3>Clear All History?</h3>
+        <p>This will permanently delete all {{ total_sessions }} prediction record{{ total_sessions|pluralize }}. This cannot be undone.</p>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-danger" onclick="clearHistory()">Yes, Clear All</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDetails(id) {
+    const el = document.getElementById('details-' + id);
+    const btn = el.previousElementSibling.querySelector('.btn-toggle');
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+        btn.textContent = 'Details ▴';
+    } else {
+        el.style.display = 'none';
+        btn.textContent = 'Details ▾';
+    }
+}
+
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', () => {
+        document.getElementById('confirmModal').style.display = 'flex';
+    });
+}
+
+function closeModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+async function clearHistory() {
+    try {
+        const resp = await fetch('/history/clear/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}
+        });
+        const data = await resp.json();
+        if (data.success) window.location.reload();
+    } catch(e) {
+        alert('Failed to clear history. Please try again.');
+    }
+    closeModal();
+}
+
+function getCookie(name) {
+    const val = `; ${document.cookie}`;
+    const parts = val.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+}
+</script>
+{% endblock %}
+
