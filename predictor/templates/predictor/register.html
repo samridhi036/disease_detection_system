@@ -1,50 +1,37 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register | Evergreen Society</title>
-<link rel="stylesheet" href="styles.css">
+<title>Register — GastroPredict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'predictor/css/auth.css' %}">
 </head>
 <body>
 <div class="auth-shell">
 
   <aside class="panel-left">
-    <div class="brand">
-      <span class="brand-mark">ES</span>
-      <span class="brand-name">Evergreen Society</span>
-    </div>
-
-    <h1 class="panel-headline">Become a member.</h1>
-    <p class="panel-sub">Fill in your details and we'll put together your membership card as you go.</p>
-
-    <div class="id-card" id="idCard" aria-hidden="true">
-      <div class="id-card-row id-card-head">
-        <span class="id-org">Evergreen<br>Society</span>
-        <span class="id-tag">Member</span>
+    <a href="/" class="brand">
+      <span class="brand-icon">🩺</span>
+      <span class="brand-name">GastroPredict</span>
+    </a>
+    <h1 class="panel-headline">Create your account.</h1>
+    <p class="panel-sub">Join GastroPredict to track your symptom history and get personalised disease predictions.</p>
+    <div class="panel-features">
+      <div class="feature-item">
+        <span class="feature-icon">🔬</span>
+        <span>AI-powered disease prediction</span>
       </div>
-      <div class="id-perf"></div>
-      <div class="id-card-row id-card-main">
-        <div class="id-photo" id="cardPhoto">&#10022;</div>
-        <div class="id-fields">
-          <div class="id-field">
-            <span class="id-label">Name</span>
-            <span class="id-value" id="cardName">Your name</span>
-          </div>
-          <div class="id-field">
-            <span class="id-label">Username</span>
-            <span class="id-value mono" id="cardUsername">@username</span>
-          </div>
-          <div class="id-field">
-            <span class="id-label">Date of birth</span>
-            <span class="id-value mono" id="cardDob">&mdash;</span>
-          </div>
-        </div>
+      <div class="feature-item">
+        <span class="feature-icon">📋</span>
+        <span>Personal prediction history</span>
       </div>
-      <div class="id-perf"></div>
-      <div class="id-card-row id-card-foot">
-        <span>No. ES-0001</span>
-        <span>Pending issue</span>
+      <div class="feature-item">
+        <span class="feature-icon">🔒</span>
+        <span>Secure & private</span>
       </div>
     </div>
   </aside>
@@ -53,56 +40,50 @@
     <div class="form-wrap">
 
       <div class="tabs" role="tablist">
-        <a class="tab" href="login.html" role="tab">Sign in</a>
-        <a class="tab active" href="register.html" role="tab" aria-current="page">Register</a>
+        <a class="tab" href="{% url 'login' %}" role="tab">Sign In</a>
+        <a class="tab active" href="{% url 'register' %}" role="tab">Register</a>
       </div>
 
-      <form class="auth-form" id="registerForm" novalidate>
+      <form class="auth-form" method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
         <h2>Create your account</h2>
-        <p class="form-intro">It only takes a minute &mdash; your card preview fills in as you type.</p>
+        <p class="form-intro">It only takes a minute to get started.</p>
+
+        {% if errors %}
+        <div class="alert-error">
+          {% for err in errors %}
+          <div>{{ err }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
 
         <div class="field-row">
           <div class="field">
-            <label for="firstName">First name</label>
-            <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" value="{{ form_data.first_name }}" required autocomplete="given-name" placeholder="First name">
           </div>
           <div class="field">
-            <label for="middleName">Middle name <span class="optional-tag">(optional)</span></label>
-            <input type="text" id="middleName" name="middleName" autocomplete="additional-name">
-          </div>
-          <div class="field">
-            <label for="lastName">Last name</label>
-            <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" value="{{ form_data.last_name }}" required autocomplete="family-name" placeholder="Last name">
           </div>
         </div>
 
-        <div class="field-row two">
+        <div class="field-row">
           <div class="field">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" required autocomplete="username">
+            <input type="text" id="username" name="username" value="{{ form_data.username }}" required autocomplete="username" placeholder="e.g. john_doe">
           </div>
           <div class="field">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required autocomplete="email">
+            <input type="email" id="email" name="email" value="{{ form_data.email }}" required autocomplete="email" placeholder="you@email.com">
           </div>
         </div>
 
-        <div class="field-row two">
-          <div class="field">
-            <label for="contact">Contact number</label>
-            <input type="tel" id="contact" name="contact" required autocomplete="tel" placeholder="+1 555 123 4567">
-          </div>
-          <div class="field">
-            <label for="dob">Date of birth</label>
-            <input type="date" id="dob" name="dob" required autocomplete="bday">
-          </div>
-        </div>
-
-        <div class="field-row two">
+        <div class="field-row">
           <div class="field">
             <label for="password">Password</label>
             <div class="input-wrap">
-              <input type="password" id="password" name="password" required autocomplete="new-password">
+              <input type="password" id="password" name="password" required autocomplete="new-password" placeholder="Create a password">
               <button type="button" class="eye-btn" data-target="password" aria-label="Show password">
                 <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -110,10 +91,10 @@
             </div>
           </div>
           <div class="field">
-            <label for="confirmPassword">Confirm password</label>
+            <label for="confirm_password">Confirm Password</label>
             <div class="input-wrap">
-              <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
-              <button type="button" class="eye-btn" data-target="confirmPassword" aria-label="Show password">
+              <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" placeholder="Repeat your password">
+              <button type="button" class="eye-btn" data-target="confirm_password" aria-label="Show password">
                 <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
               </button>
@@ -126,23 +107,20 @@
           <li data-rule="length">At least 8 characters</li>
           <li data-rule="upper">One uppercase letter</li>
           <li data-rule="number">One number</li>
-          <li data-rule="special">One special character</li>
+          <li data-rule="special">One special character (!@#$%^&*...)</li>
         </ul>
 
-        <button type="submit" class="submit-btn">Create account</button>
+        <button type="submit" class="submit-btn">Create Account</button>
 
         <div class="form-links">
-          <a href="login.html">Already have an account? Login</a>
+          <a href="{% url 'login' %}">Already have an account? Sign In</a>
         </div>
-
-        <div class="status-msg" role="status"></div>
       </form>
 
     </div>
   </main>
 
 </div>
-
-<script src="script.js"></script>
+<script src="{% static 'predictor/js/auth.js' %}"></script>
 </body>
 </html>

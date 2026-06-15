@@ -1,50 +1,37 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign in | Evergreen Society</title>
-<link rel="stylesheet" href="styles.css">
+<title>Sign In — GastroPredict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'predictor/css/auth.css' %}">
 </head>
 <body>
 <div class="auth-shell">
 
   <aside class="panel-left">
-    <div class="brand">
-      <span class="brand-mark">ES</span>
-      <span class="brand-name">Evergreen Society</span>
-    </div>
-
+    <a href="/" class="brand">
+      <span class="brand-icon">🩺</span>
+      <span class="brand-name">GastroPredict</span>
+    </a>
     <h1 class="panel-headline">Welcome back.</h1>
-    <p class="panel-sub">Sign in with your username or email to get back to your membership.</p>
-
-    <div class="id-card" aria-hidden="true">
-      <div class="id-card-row id-card-head">
-        <span class="id-org">Evergreen<br>Society</span>
-        <span class="id-tag">Member</span>
+    <p class="panel-sub">Sign in with your username or email address to access your prediction history and results.</p>
+    <div class="panel-features">
+      <div class="feature-item">
+        <span class="feature-icon">🔬</span>
+        <span>AI-powered disease prediction</span>
       </div>
-      <div class="id-perf"></div>
-      <div class="id-card-row id-card-main">
-        <div class="id-photo">&#10022;</div>
-        <div class="id-fields">
-          <div class="id-field">
-            <span class="id-label">Name</span>
-            <span class="id-value">Returning member</span>
-          </div>
-          <div class="id-field">
-            <span class="id-label">Status</span>
-            <span class="id-value mono">Active</span>
-          </div>
-          <div class="id-field">
-            <span class="id-label">Access</span>
-            <span class="id-value mono">All areas</span>
-          </div>
-        </div>
+      <div class="feature-item">
+        <span class="feature-icon">📋</span>
+        <span>Personal prediction history</span>
       </div>
-      <div class="id-perf"></div>
-      <div class="id-card-row id-card-foot">
-        <span>No. ES-0001</span>
-        <span>Valid card</span>
+      <div class="feature-item">
+        <span class="feature-icon">🔒</span>
+        <span>Secure & private</span>
       </div>
     </div>
   </aside>
@@ -53,23 +40,28 @@
     <div class="form-wrap">
 
       <div class="tabs" role="tablist">
-        <a class="tab active" href="login.html" role="tab" aria-current="page">Sign in</a>
-        <a class="tab" href="register.html" role="tab">Register</a>
+        <a class="tab active" href="{% url 'login' %}" role="tab">Sign In</a>
+        <a class="tab" href="{% url 'register' %}" role="tab">Register</a>
       </div>
 
-      <form class="auth-form" id="loginForm" novalidate>
+      <form class="auth-form" method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
         <h2>Sign in</h2>
         <p class="form-intro">Use your username or your email address.</p>
 
+        {% if error %}
+        <div class="alert-error">{{ error }}</div>
+        {% endif %}
+
         <div class="field">
-          <label for="identifier">Username or email</label>
-          <input type="text" id="identifier" name="identifier" required autocomplete="username">
+          <label for="identifier">Username or Email</label>
+          <input type="text" id="identifier" name="identifier" value="{{ identifier }}" required autocomplete="username" placeholder="e.g. john_doe or john@email.com">
         </div>
 
         <div class="field">
           <label for="loginPassword">Password</label>
           <div class="input-wrap">
-            <input type="password" id="loginPassword" name="password" required autocomplete="current-password">
+            <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Your password">
             <button type="button" class="eye-btn" data-target="loginPassword" aria-label="Show password">
               <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -77,21 +69,17 @@
           </div>
         </div>
 
-        <button type="submit" class="submit-btn">Sign in</button>
+        <button type="submit" class="submit-btn">Sign In</button>
 
         <div class="form-links">
-          <a href="register.html">Don't have an account? Register!</a>
-          <a href="forgot-password.html">Forgot password?</a>
+          <a href="{% url 'register' %}">Don't have an account? Register!</a>
         </div>
-
-        <div class="status-msg" role="status"></div>
       </form>
 
     </div>
   </main>
 
 </div>
-
-<script src="script.js"></script>
+<script src="{% static 'predictor/js/auth.js' %}"></script>
 </body>
 </html>
