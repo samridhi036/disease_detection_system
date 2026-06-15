@@ -148,9 +148,11 @@
             {% endfor %}
         </div>
 
+        <div id="minSymptomsWarning" class="min-symptoms-warning" style="display:none;"></div>
+
         <div class="action-bar">
             <button class="btn-clear" id="clearAll">Clear All</button>
-            <button class="btn-predict" id="predictBtn" disabled>
+            <button class="btn-predict" id="predictBtn" disabled title="Select at least 5 symptoms to predict">
                 <span class="btn-icon">🔬</span>
                 Predict Disease
             </button>
